@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+	<title>视频列表</title>
+	<meta name="keywords" content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台" />
+	<meta name="description" content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术" />
+
+	<link rel="shortcut icon" href="favicon.ico" /> <link href="../css/bootstrap.min.css?v=3.3.6" rel="stylesheet" />
+	<link href="../css/font-awesome.css?v=4.4.0" rel="stylesheet" />
+
+	<link href="../css/animate.css" rel="stylesheet" />
+	<link href="../css/style.css?v=4.1.0" rel="stylesheet" />
+
+</head>
+
+<body class="gray-bg">
+<div class="row wrapper border-bottom white-bg page-heading">
+	<div class="col-sm-4">
+		<div class="dropdown profile-element">
+			<div class="col-sm-3" style="padding-top:15px;"><img alt="image" class="img-circle" src="../img/logo1.jpg" width="114px" height="57px"/></div>
+			<div class="col-sm-9" style="font-size:30px;font-weight:bolder;padding-top:30px;font-family: 'Microsoft Himalaya'">欢迎来到视频在线网</div>
+		</div>
+	</div>
+	<div class="col-sm-8">
+		<div class="title-action">
+			<a href="hplus/index.html" class="btn btn-success">&nbsp;&nbsp;后&nbsp;&nbsp;台&nbsp;&nbsp;</a>
+			<!--<a href="/afterVideoList" class="btn btn-success">&nbsp;&nbsp;后&nbsp;&nbsp;台&nbsp;&nbsp;</a>-->
+			<a href="login" class="btn btn-success">&nbsp;&nbsp;登&nbsp;&nbsp;录&nbsp;&nbsp;</a>
+			<a href="register" class="btn btn-success">&nbsp;&nbsp;注&nbsp;&nbsp;册&nbsp;&nbsp;</a>
+			<a href="javascript:logout()" class="btn btn-success">&nbsp;&nbsp;退&nbsp;&nbsp;出&nbsp;&nbsp;</a>
+		</div>
+	</div>
+</div>
+<div class="player player-video stopped fullscreen-enabled fullscreen-hide-controls">
+	<div class="col-sm-8" style="margin-top:18px;">
+		<div class="panel panel-success">
+			<div class="panel-heading"><i class="glyphicon glyphicon-facetime-video"></i>&nbsp;&nbsp;播放视频</div>
+			<div class="panel-body">
+				<video width="100%" height="507px;" controls="true" autobuffer="true" autoplay="autoplay">
+					当前浏览器不支持 video直接播放，点击这里下载视频： <a href="myvideo.webm">下载视频</a>
+				</video>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-4" style="margin-top:18px;">
+		<div class="panel panel-success">
+			<div class="panel-heading"><i class="glyphicon glyphicon-th-list"></i>&nbsp;&nbsp;视频列表</div>
+			<div class="panel-body">
+				<ol class="videoli" >
+					<li style="color:#23c6c8 ;" th:if="${videoList} ne null" th:each="v:${videoList}" th:value="${v.address}" th:id="${v.id}">
+                            <label th:text="${v.name}"/>
+                            (<label id="chickRate" th:text="${v.chick_rate}"/>)
+                    </li>
+				</ol>
+			</div>
+		</div>
+		<div class="panel panel-success">
+			<div class="panel-heading"><i class="glyphicon glyphicon-th-list"></i>&nbsp;&nbsp;评论列表</div>
+			<div class="panel-body">
+				<ol class="comment" style="height: 200px;overflow: auto;line-height: 30px;">
+				</ol>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-12">
+		<div class="panel panel-success">
+			<div class="panel-heading">
+				<i class="glyphicon glyphicon-edit"></i>&nbsp;&nbsp;发表评论
+				<input type="hidden" id="videoId" name="videoId"/>
+			</div>
+			<textarea rows="3" class="csPp_textarea" placeholder="我来说两句..." data-qitan-ele="pubTxtBox" style="font-size:14px;line-height:20px;padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;"></textarea><br/>
+			<div style="text-align: right;padding-bottom:10px;padding-right: 10px;">
+				<a class="btnCit btn-success">&nbsp;&nbsp;提&nbsp;&nbsp;交&nbsp;&nbsp;</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- 全局js -->
+<script src="../js/plugins/jquery.min.js?v=2.1.4"></script>
+<script src="../js/plugins/bootstrap.min.js?v=3.3.6"></script>
+
+
+<!-- 自定义js -->
+<script src="../js/plugins/content.js?v=1.0.0"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $(".videoli li").each(function(index){
+            $(this).click(function(){
+                $(this).parent().prepend($(this));
+                $(this).css("color","#23c6c8").siblings().css("color","#676a6c")
+                $("video").attr("src",$(this).attr("value"))
+                var id = $(this).attr("id");
+
+                $.ajax({
+                    //请求方式为get
+                    type:"GET",
+                    //json文件位置
+                    url:"/tComment",
+                    data:{"videoId":id},
+                    //返回数据格式为json
+                    dataType: "json",
+                    //请求成功完成后要执行的方法
+                    success: function(data){
+                        //获取点击率
+                        var v = parseInt($("#chickRate").text());
+                        //每点击一次,点击率+1
+                        $("#chickRate").text(v+1);
+                        //清空评论列表,否则会出现重复添加
+                        $(".comment").empty();
+                        $("#videoId").val(id);
+                        //使用$.each方法遍历返回的数据date,插入评论列表中
+                        var str="";
+                        $.each(data,function(i){
+                            str+="<li>"+data[i].content+"</li>";
+                        })
+                        $(".comment").html(str);
+                    }
+                });
+            })
+        })
+
+        $(".btnCit").click(function(){
+            if($(".csPp_textarea").val()!=""){
+                $.ajax({
+                    //请求方式为get
+                    type:"GET",
+                    url:"/saveTComment",
+                    data:{"videoId":$("#videoId").val(),"content":$(".csPp_textarea").val()},
+                    //返回数据格式为json
+                    dataType: "text",
+                    //请求成功完成后要执行的方法
+                    success: function(data){
+                        //如果评论添加成功,则加入到评论列表中,不用调用后台代码进行插入操作
+                        $(".comment").prepend('<li>'+$(".csPp_textarea").val()+'</li>');
+                        //插入成功后,清除文本域(textarea)中数据
+                        $(".csPp_textarea").val('');
+                        //给页面一个提示,插入成功或失败
+                        if (data == 'success')
+                            alert('评论添加成功');
+                        else
+                            alert('评论添加失败');
+                    }
+                });
+            }else {
+                alert("评论不能为空");
+            }
+        })
+    });
+</script>
+</body>
+</html>

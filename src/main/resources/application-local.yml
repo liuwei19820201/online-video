@@ -1,0 +1,23 @@
+mybatis:
+  mapper-locations: mapper/*.xml
+  type-aliases-package: com.example.demo.mybatis.mapper
+  type-handlers-package: org.apache.ibatis.type.LocalDateTypeHandler
+
+spring:
+  datasource:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/test?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
+      username: root
+      password: root
+      type: com.zaxxer.hikari.HikariDataSource
+  http:
+      multipart:
+        max-file-size: 1024MB
+        max-request-size: 1024MB
+server:
+  port: 8011
+  tomcat:
+    max-threads: 1024
+    uri-encoding: utf-8
+#    basedir: /home/tomcat-mc
+    basedir: E:\tomcat-mc
