@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>个人中心-发布文章</title>
+    <link rel="stylesheet" href="http://static.runoob.com/assets/js/jquery-treeview/jquery.treeview.css"/>
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<style>
+    .fileupload, .fileupload2 {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+</style>
+<body id="personal-center-public">
+<div class="subcont">
+    <div class="subcont_publish">
+        <div class="subcont_publish_add" style="height: 600px;">
+            <div class="blocks">
+                <div class="textAndMd5">
+                    <div class="pb30 clearfix" style="padding-left:70px;">
+
+                        <label class="add_pic fl">
+                            <span></span>
+                            <em>点击上传视频</em>
+                            <form enctype="multipart/form-data"><input type="file" name="file" class="fileupload2">
+                            </form>
+                        </label>
+                        <img style="width:200px;height:100px;margin-left:20px;" hidden>
+                        <input type="hidden" class="md5Hid"/>
+                    </div>
+                    <div style="font-size: 16px;line-height: 35px;">
+                        <table>
+                            <tr>
+                                <td style="text-align: right">文件名：</td>
+                                <td style="text-align: left">
+                                    <input type="text" id="realName" disabled/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right">后缀：</td>
+                                <td style="text-align: left">
+                                    <input type="text" id="suffix" disabled/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right">MD5：</td>
+                                <td style="text-align: left">
+                                    <input type="text" id="md5" disabled/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right">上传结果：</td>
+                                <td style="text-align: left">
+                                    <input type="text" id="uploadRes" disabled/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right">保存结果：</td>
+                                <td style="text-align: left">
+                                    <input type="text" id="isSaved" disabled/>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="tx_c pb30 fl" style="padding-left:70px;padding-top:20px;">
+                            <a class="g_btn_red" onclick="save()">保存</a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="../js/plugins/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $(".fileupload,.fileupload2").on('change', function (e) {
+            var fileName = e.target.value.split('\\').pop();
+            var imgReg = /(mp4)$/;
+            if (!fileName) {
+                alert("请选择文件!");
+                return;
+            }
+            if (!imgReg.test(fileName)) {
+                alert("请选择图片!");
+                return;
+            }
+            var $label = $(this).parent().parent();
+            var file = new FormData($(this).parent("form")[0]);
+            $.ajax({
+                url: "/upload",
+                type: 'POST',
+                data: file,
+                async: false,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    $("#realName").val(response.data.realName);
+                    $("#suffix").val(response.data.suffix);
+                    $("#md5").val(response.data.md5);
+                    $("#uploadRes").val("上传成功");
+                    $("#isSaved").val("未保存");
+                },
+                error: function (response) {
+                    $("#realName").val("");
+                    $("#suffix").val("");
+                    $("#md5").val("");
+                    $("#uploadRes").val("上传失败");
+                    $("#isSaved").val("未保存");
+                }
+            });
+        });
+    });
+    function save() {
+        var params = {};
+        params.realName = $("#realName").val();
+        params.suffix = $("#suffix").val();
+        params.md5 = $("#md5").val();
+
+        $.ajax({
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            dataType: "json",
+            data: JSON.stringify(params),
+            url: "/video/save",
+            success: function(result){
+                if (result.code == 200) {
+                    $("#isSaved").val("保存成功");
+                } else {
+                    $("#isSaved").val("保存失败");
+                }
+            }
+        });
+    }
+</script>
+</body>
+
+</html>
